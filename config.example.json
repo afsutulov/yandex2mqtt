@@ -1,72 +1,36 @@
 {
-  "http": {
-    "listen": "0.0.0.0:444",
-    "cookieSecure": true
-  },
-  "https": {
-    "privateKey": "/etc/letsencrypt/live/home.sutulov.ru/privkey.pem",
-    "certificate": "/etc/letsencrypt/live/home.sutulov.ru/fullchain.pem"
-  },
   "mqtt": {
-    "url": "tcp://192.168.1.2:1883",
-    "user": "as",
-    "password": "password",
+    "url": "tcp://127.0.0.1:1883",
+    "user": "mqtt-user",
+    "password": "REPLACE_MQTT_PASSWORD",
     "clientId": "yandex2mqtt-go",
     "qos": 1,
     "timeoutMs": 1500
   },
-  "oauth": {
-    "accessTokenTTLSeconds": 86400,
-    "refreshTokenTTLSeconds": 7776000,
-    "codeTTLSeconds": 300
-  },
-  "users": [
-    {
-      "id": "1",
-      "username": "user2",
-      "name": "Administrator",
-      "passwordHash": "$2a$12$y4AH08PlR1RuUrQUJNWs5.cqQXo2VYefQiv0Hk6Z/9cIiWJKHO01C"
-    }
-  ],
   "clients": [
     {
       "id": "1",
       "name": "Yandex",
-      "clientId": "user1",
-      "clientSecret": "password1",
+      "clientId": "yandex2mqtt",
+      "clientSecret": "REPLACE_WITH_RANDOM_CLIENT_SECRET",
       "isTrusted": false,
       "redirectUris": [
         "https://social.yandex.net/broker/redirect"
       ]
     }
   ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "name": "Administrator",
+      "passwordHash": "REPLACE_WITH_BCRYPT_HASH"
+    }
+  ],
   "devices": [
     {
-      "id": "Polotense01",
-      "name": "Полотенцесушитель",
-      "room": "Ванная",
-      "type": "devices.types.switch",
-      "allowedUsers": [
-        "1"
-      ],
-      "mqtt": [
-        {
-          "instance": "on",
-          "set": "/yandex/Polotense01",
-          "state": "/yandex/Polotense01/state"
-        }
-      ],
-      "capabilities": [
-        {
-          "type": "devices.capabilities.on_off",
-          "retrievable": true,
-          "reportable": true
-        }
-      ]
-    },
-    {
-      "id": "Svet01",
-      "name": "Свет",
+      "id": "haw-002-switch",
+      "name": "Свет в коридоре",
       "room": "Коридор",
       "type": "devices.types.light",
       "allowedUsers": [
@@ -75,8 +39,9 @@
       "mqtt": [
         {
           "instance": "on",
-          "set": "/yandex/Svet01",
-          "state": "/yandex/Svet01/state"
+          "set": "/yandex/controls/light_HaW_002/on",
+          "state": "/yandex/controls/light_HaW_002/on/state",
+          "confirmTimeoutMs": 1200
         }
       ],
       "capabilities": [
@@ -88,18 +53,34 @@
       ]
     },
     {
-      "id": "Voda01",
-      "name": "Вода",
-      "room": "Ванная",
-      "type": "devices.types.switch",
+      "id": "lvr-003-switch",
+      "name": "Основной свет",
+      "room": "Гостиная",
+      "type": "devices.types.light",
       "allowedUsers": [
         "1"
       ],
       "mqtt": [
         {
           "instance": "on",
-          "set": "/yandex/Voda01",
-          "state": "/yandex/Voda01/state"
+          "set": "/yandex/controls/light_LvR_003/on",
+          "state": "/yandex/controls/light_LvR_003/on/state",
+          "confirmTimeoutMs": 1200
+        }
+      ],
+      "valueMapping": [
+        {
+          "type": "on_off",
+          "mapping": [
+            [
+              false,
+              true
+            ],
+            [
+              0,
+              1
+            ]
+          ]
         }
       ],
       "capabilities": [
@@ -111,135 +92,141 @@
       ]
     },
     {
-      "id": "Voda02",
-      "name": "Вода",
-      "room": "Кухня",
-      "type": "devices.types.switch",
-      "allowedUsers": [
-        "1"
-      ],
-      "mqtt": [
-        {
-          "instance": "on",
-          "set": "/yandex/Voda02",
-          "state": "/yandex/Voda02/state"
-        }
-      ],
-      "capabilities": [
-        {
-          "type": "devices.capabilities.on_off",
-          "retrievable": true,
-          "reportable": true
-        }
-      ]
-    },
-    {
-      "id": "Rozetki01",
-      "name": "Розетки",
-      "room": "Прихожая",
-      "type": "devices.types.switch",
-      "allowedUsers": [
-        "1"
-      ],
-      "mqtt": [
-        {
-          "instance": "on",
-          "set": "/yandex/Rozetki01",
-          "state": "/yandex/Rozetki01/state"
-        }
-      ],
-      "capabilities": [
-        {
-          "type": "devices.capabilities.on_off",
-          "retrievable": true,
-          "reportable": true
-        }
-      ]
-    },
-    {
-      "id": "Plita01",
-      "name": "Плита",
-      "room": "Кухня",
-      "type": "devices.types.switch",
-      "allowedUsers": [
-        "1"
-      ],
-      "mqtt": [
-        {
-          "instance": "on",
-          "set": "/yandex/Plita01",
-          "state": "/yandex/Plita01/state"
-        }
-      ],
-      "capabilities": [
-        {
-          "type": "devices.capabilities.on_off",
-          "retrievable": true,
-          "reportable": true
-        }
-      ]
-    },
-    {
-      "id": "Pogoda01",
-      "name": "Датчик температуры",
-      "room": "Детская",
-      "type": "devices.types.sensor.climate",
+      "id": "lvr-001-weather",
+      "name": "В гостиной",
+      "room": "Гостиная",
+      "type": "devices.types.sensor",
       "allowedUsers": [
         "1"
       ],
       "mqtt": [
         {
           "instance": "temperature",
-          "state": "/yandex/Pogoda01/temperature"
+          "state": "/yandex/sensors/LvR_001_Weather/temperature"
         },
         {
           "instance": "humidity",
-          "state": "/yandex/Pogoda01/humidity"
-        },
-        {
-          "instance": "pressure",
-          "state": "/yandex/Pogoda01/pressure"
+          "state": "/yandex/sensors/LvR_001_Weather/humidity"
         }
       ],
       "properties": [
         {
           "type": "devices.properties.float",
           "retrievable": true,
-          "reportable": true,
           "parameters": {
             "instance": "temperature",
             "unit": "unit.temperature.celsius"
-          }
+          },
+          "reportable": true
         },
         {
           "type": "devices.properties.float",
           "retrievable": true,
-          "reportable": true,
           "parameters": {
             "instance": "humidity",
             "unit": "unit.percent"
-          }
+          },
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "plug-001-flower",
+      "name": "Розетка для цветка",
+      "room": "Гостиная",
+      "type": "devices.types.socket",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "on",
+          "set": "/yandex/controls/socket_LvR_002/on",
+          "state": "/yandex/controls/socket_LvR_002/on/state",
+          "confirmTimeoutMs": 1200
         },
+        {
+          "instance": "power",
+          "state": "/yandex/controls/socket_LvR_002/power"
+        }
+      ],
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "reportable": true
+        }
+      ],
+      "properties": [
         {
           "type": "devices.properties.float",
           "retrievable": true,
-          "reportable": true,
           "parameters": {
-            "instance": "pressure",
-            "unit": "unit.pressure.mmhg"
-          }
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "haw-001-motion",
+      "name": "Движение",
+      "room": "Коридор",
+      "type": "devices.types.sensor",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "motion",
+          "state": "/yandex/sensors/HaW_001_Motion/motion"
+        }
+      ],
+      "valueMapping": [
+        {
+          "type": "event",
+          "mapping": [
+            [
+              "not_detected",
+              "detected"
+            ],
+            [
+              "false",
+              "true"
+            ]
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.event",
+          "retrievable": true,
+          "parameters": {
+            "instance": "motion",
+            "events": [
+              {
+                "value": "detected"
+              },
+              {
+                "value": "not_detected"
+              }
+            ]
+          },
+          "reportable": true
         }
       ]
     }
   ],
-  "notification": [
-    {
-      "skill_id": "b96e8944-1111-4da3-89d6-557a9389ac1d",
-      "oauth_token": "y0__xD7rYs11113EyDYmdWVEgWLmgG90wzc1goDujZM6HA7hqfa",
-      "user_id": "1",
-      "client_id": "user1",
-      "local_user_id": "1"
-    }
-  ],
-  "dataFile": "data/tokens.json"
+  "http": {
+    "listen": "127.0.0.1:8080",
+    "cookieSecure": true
+  },
+  "oauth": {
+    "accessTokenTTLSeconds": 86400,
+    "refreshTokenTTLSeconds": 7776000,
+    "codeTTLSeconds": 300
+  },
+  "dataFile": "data/tokens.json",
+  "notification": []
 }
