@@ -364,30 +364,6 @@ CGO_ENABLED=0 go build -buildvcs=false -mod=readonly -trimpath -ldflags="-s -w" 
 Set GOOS and GOARCH to cross-compile. SHA256SUMS contains hashes of the included
 binaries. Dependency downloads are unnecessary when running a provided binary.
 
-## Docker and systemd
-
-For Docker, set http.listen to `0.0.0.0:8080` and use a broker URL accessible inside
-the container. Container loopback points to the container itself. Docker builds
-download modules in a cached build stage. Prepare config.json and a writable data
-directory owned by your selected UID/GID:
-
-```bash
-mkdir -p data
-chmod 700 data
-export Y2M_UID=$(id -u)
-export Y2M_GID=$(id -g)
-docker compose up -d --build
-docker compose logs -f
-```
-
-For systemd, install the binary and private config in /opt/yandex2mqtt, create a
-service user and a writable data directory, then install `deploy/yandex2mqtt.service`.
-Detailed installation commands are in [README.ru.md](README.ru.md#systemd--linux).
-Keep a public HTTPS reverse proxy in front of the service.
-
-Logs are structured JSON on stdout and provider requests include X-Request-Id.
-Authorization headers, passwords and OAuth query parameters are not logged.
-
 ## Deployment readiness
 
 1.2.4 is suitable for a single home/small private bridge **after live acceptance**.
