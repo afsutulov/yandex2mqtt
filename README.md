@@ -1,15 +1,12 @@
-# yandex2mqtt Go 1.2.4
+# yandex2mqtt (1.2.5 Go)
 
 [Русская версия](README.ru.md)
 
 A bridge between **Yandex Smart Home / Alice** and MQTT. This is a Go
-rewrite of [alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt), based on
-commit `d26960b8fcc34ba0f4cc6f62114e957b3cc0f0f3`. Upstream attribution is preserved
-in the MIT LICENSE and file hashes are recorded in UPSTREAM.json.
+rewrite of [alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt).
 
 The server runs entirely in Go. PostgreSQL, Redis, Node.js and npm are unnecessary
 at runtime. Tokens are stored in a local JSON file; Eclipse Paho handles MQTT.
-Node.js is only needed for the optional one-time export of a legacy JS config.
 
 The release includes source, tests, configuration examples and executable binaries
 for Linux amd64/arm64, Windows amd64 and macOS arm64 in `bin/`.

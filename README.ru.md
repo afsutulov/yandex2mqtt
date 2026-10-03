@@ -1,13 +1,11 @@
-# yandex2mqtt — версия на Go 1.2.4
+# yandex2mqtt — ( 1.2.5 Go)
 
 [English (default)](README.md)
 
 Мост между **Яндекс Умным домом / Алисой** и MQTT. Перенос проекта
-[alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt), ветка `master`,
-коммит `d26960b8fcc34ba0f4cc6f62114e957b3cc0f0f3`.
+[alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt).
 
-Рабочий сервер написан на Go; Node.js нужен только для необязательного однократного
-экспорта старого JavaScript-конфига. PostgreSQL, Redis и внешняя база не требуются.
+Рабочий сервер написан на Go. PostgreSQL, Redis и внешняя база не требуются.
 Данные авторизации сохраняются в локальном JSON-файле. MQTT-клиент — Eclipse Paho.
 Лицензия MIT, исходное авторство сохранено в LICENSE.
 
