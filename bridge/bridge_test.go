@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"html"
 	"io"
 	"log/slog"
 	"net/http"
@@ -309,10 +310,14 @@ func TestOAuthCodeFlowCSRFReplayRefreshAndPersistence(t *testing.T) {
 	decision.AddCookie(sessionCookie)
 	w = httptest.NewRecorder()
 	s.Handler().ServeHTTP(w, decision)
-	if w.Code != 302 {
+	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	loc, _ := url.Parse(w.Header().Get("Location"))
+	link := regexp.MustCompile(`href="([^"]+)"`).FindStringSubmatch(w.Body.String())
+	if len(link) != 2 {
+		t.Fatal("OAuth return link missing")
+	}
+	loc, _ := url.Parse(html.UnescapeString(link[1]))
 	if loc.Query().Get("state") != "original-state" || loc.Query().Get("client_id") != "yandex-client" {
 		t.Fatal("OAuth values lost")
 	}

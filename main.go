@@ -21,7 +21,7 @@ import (
 	"yandex2mqtt/bridge"
 )
 
-var version = "1.2.4"
+var version = "1.2.5"
 
 func main() {
 	if e := run(); e != nil {
@@ -38,7 +38,7 @@ func run() error {
 	showVersion := flag.Bool("version", false, "print version")
 	flag.Parse()
 	if *showVersion {
-		fmt.Println("yandex2mqtt", version)
+		fmt.Println("yandex2mqtt-go", version)
 		return nil
 	}
 	if *hash {

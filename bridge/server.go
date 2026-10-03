@@ -43,6 +43,25 @@ type passwordCheck struct {
 	cost int
 	hash []byte
 }
+type oauthStatusWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *oauthStatusWriter) WriteHeader(status int) {
+	if w.status == 0 {
+		w.status = status
+		w.ResponseWriter.WriteHeader(status)
+	}
+}
+func (w *oauthStatusWriter) Write(b []byte) (int, error) {
+	if w.status == 0 {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(b)
+}
+func (w *oauthStatusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
+
 type Server struct {
 	Config         Config
 	Registry       *Registry
@@ -153,6 +172,18 @@ func (s *Server) Handler() http.Handler {
 		mux.HandleFunc("POST "+base+"/user/unlink", s.unlink)
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/login" || r.URL.Path == "/oauth/token" || r.URL.Path == "/dialog/authorize" || r.URL.Path == "/dialog/authorize/decision" {
+			audit := &oauthStatusWriter{ResponseWriter: w}
+			w = audit
+			defer func() {
+				status := audit.status
+				if status == 0 {
+					status = http.StatusOK
+				}
+				// Never log query strings, form data, Location or credentials.
+				s.Log.Info("OAuth request", "method", r.Method, "path", r.URL.Path, "status", status)
+			}()
+		}
 		defer func() {
 			if v := recover(); v != nil {
 				s.Log.Error("HTTP panic", "path", r.URL.Path)
@@ -182,6 +213,7 @@ func (s *Server) json(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 func (s *Server) oauthError(w http.ResponseWriter, status int, code string) {
+	s.Log.Warn("OAuth error", "status", status, "error", code)
 	s.json(w, status, map[string]string{"error": code})
 }
 func (s *Server) user(id string) *User {
@@ -399,6 +431,11 @@ func safeReturn(raw string) string {
 
 var pageTemplate = template.Must(template.New("page").Parse(`<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{.Title}}</title><style>body{font:17px system-ui;max-width:520px;margin:8vh auto;padding:24px;color:#202530}input,button{font:inherit;box-sizing:border-box;padding:10px;margin:8px 0;width:100%}button{cursor:pointer}a{color:#1456b8}</style><h1>{{.Title}}</h1>{{.Body}}</html>`))
 
+// A document navigation ends the consent POST before leaving this origin.
+// Unlike a form redirect chain, meta refresh and the fallback link are not
+// limited by form-action when the OAuth broker redirects to another origin.
+var oauthReturnTemplate = template.Must(template.New("oauth-return").Parse(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url={{.URL}}"><title>Возвращение в приложение</title></head><body><p>Возвращаемся в приложение…</p><p><a href="{{.URL}}">Продолжить</a></p></body></html>`))
+
 func (s *Server) page(w http.ResponseWriter, title string, body template.HTML) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_ = pageTemplate.Execute(w, struct {
@@ -534,7 +571,13 @@ func (s *Server) authorize(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	client := s.client(q.Get("client_id"))
 	redirect := q.Get("redirect_uri")
-	if client == nil || !contains(client.RedirectURIs, redirect) {
+	if client == nil {
+		s.Log.Warn("OAuth authorization rejected", "reason", "unknown_client")
+		s.oauthError(w, 400, "invalid_request")
+		return
+	}
+	if !contains(client.RedirectURIs, redirect) {
+		s.Log.Warn("OAuth authorization rejected", "reason", "redirect_uri_mismatch")
 		s.oauthError(w, 400, "invalid_request")
 		return
 	}
@@ -545,6 +588,7 @@ func (s *Server) authorize(w http.ResponseWriter, r *http.Request) {
 	}
 	challenge := q.Get("code_challenge")
 	if challenge != "" && (q.Get("code_challenge_method") != "S256" || len(challenge) != 43) {
+		s.Log.Warn("OAuth authorization rejected", "reason", "invalid_pkce")
 		s.oauthError(w, 400, "invalid_request")
 		return
 	}
@@ -590,6 +634,7 @@ func (s *Server) decision(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.Unlock()
 	if !found {
+		s.Log.Warn("OAuth consent rejected", "reason", "expired_or_reused_transaction")
 		s.oauthError(w, 400, "invalid_request")
 		return
 	}
@@ -631,7 +676,10 @@ func (s *Server) finishAuthorization(w http.ResponseWriter, r *http.Request, a a
 		u.Fragment = fragment.Encode()
 	}
 	u.RawQuery = q.Encode()
-	http.Redirect(w, r, u.String(), 302)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := oauthReturnTemplate.Execute(w, struct{ URL string }{u.String()}); err != nil {
+		s.Log.Error("OAuth return page failed")
+	}
 }
 func (s *Server) token(w http.ResponseWriter, r *http.Request) {
 	if e := r.ParseForm(); e != nil {
