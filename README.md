@@ -1,4 +1,4 @@
-# yandex2mqtt 1.2.5 Go
+# yandex2mqtt (Go)
 
 [Русская версия](README.ru.md)
 

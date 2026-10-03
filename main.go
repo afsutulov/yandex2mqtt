@@ -21,7 +21,7 @@ import (
 	"yandex2mqtt/bridge"
 )
 
-var version = "1.2.5"
+var version = "1.2.6"
 
 func main() {
 	if e := run(); e != nil {
@@ -38,7 +38,7 @@ func run() error {
 	showVersion := flag.Bool("version", false, "print version")
 	flag.Parse()
 	if *showVersion {
-		fmt.Println("yandex2mqtt-go", version)
+		fmt.Println("yandex2mqtt", version)
 		return nil
 	}
 	if *hash {
@@ -76,7 +76,10 @@ func run() error {
 		fmt.Printf("Configuration OK: %d devices, %d users\n", len(c.Devices), len(c.Users))
 		return nil
 	}
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	log, e := bridge.NewLogger(os.Stdout, c.Logging)
+	if e != nil {
+		return e
+	}
 	if e := os.MkdirAll(filepath.Dir(c.DataFile), 0700); e != nil {
 		return e
 	}
@@ -113,7 +116,7 @@ func run() error {
 	registry.OnChange = notifier.Enqueue
 	notifier.Start(ctx)
 	mqtt.Start(ctx, registry)
-	httpServer := &http.Server{Addr: c.HTTP.Listen, Handler: server.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
+	httpServer := &http.Server{Addr: c.HTTP.Listen, Handler: server.Handler(), ErrorLog: slog.NewLogLogger(log.Handler(), slog.LevelError), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
 	if c.HTTPS.Certificate != "" {
 		// Renewed certificates are picked up without a restart.
 		certs, e := bridge.NewCertReloader(c.HTTPS.Certificate, c.HTTPS.PrivateKey, log)

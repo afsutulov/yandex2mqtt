@@ -17,6 +17,7 @@ import (
 )
 
 type Config struct {
+	Logging      LoggingConfig        `json:"logging,omitempty"`
 	HTTP         HTTPConfig           `json:"http"`
 	HTTPS        HTTPSConfig          `json:"https,omitempty"`
 	MQTT         MQTTConfig           `json:"mqtt"`
@@ -77,12 +78,16 @@ type Client struct {
 	RedirectURIs []string `json:"redirectUris"`
 }
 type NotificationConfig struct {
+	Enabled     *bool  `json:"enabled,omitempty"`
 	SkillID     string `json:"skill_id"`
 	Token       string `json:"oauth_token"`
 	UserID      string `json:"user_id"`
 	LocalUserID string `json:"local_user_id,omitempty"`
 	ClientID    string `json:"client_id,omitempty"`
 }
+
+func (n NotificationConfig) enabled() bool { return n.Enabled == nil || *n.Enabled }
+
 type DeviceConfig struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
@@ -198,6 +203,10 @@ func LoadConfig(path string) (Config, error) {
 	return c, c.Validate()
 }
 func (c *Config) Defaults() {
+	c.Logging.Level = strings.ToLower(strings.TrimSpace(c.Logging.Level))
+	if c.Logging.Level == "" {
+		c.Logging.Level = "info"
+	}
 	if c.HTTP.Listen == "" {
 		p := c.HTTP.Port
 		if p == 0 {
@@ -272,6 +281,9 @@ func decodeStrictJSON(b []byte, out any) error {
 	return nil
 }
 func (c Config) Validate() error {
+	if _, e := c.Logging.ParseLevel(); e != nil {
+		return e
+	}
 	for _, raw := range c.HTTP.TrustedProxies {
 		if _, e := netip.ParsePrefix(raw); e != nil {
 			return fmt.Errorf("invalid trusted proxy CIDR %q", raw)
@@ -503,7 +515,19 @@ func (c Config) Validate() error {
 			}
 		}
 	}
-	for _, n := range c.Notification {
+	for i, n := range c.Notification {
+		if !n.enabled() {
+			continue
+		}
+		if n.SkillID == "" || !validSkillID(n.SkillID) {
+			return fmt.Errorf("notification[%d].skill_id must contain only letters, digits, hyphens or underscores; copy the ID, not a URL", i)
+		}
+		if strings.HasSuffix(n.SkillID, "-draft") {
+			return fmt.Errorf("notification[%d].skill_id refers to a draft: publish the skill (private publication is sufficient) and copy its published ID", i)
+		}
+		if n.Token == "" || strings.ContainsAny(n.Token, " \t\r\n") {
+			return fmt.Errorf("notification[%d].oauth_token must be the skill owner's Dialogs OAuth token without whitespace", i)
+		}
 		if len(c.Clients) > 1 && n.ClientID == "" {
 			return errors.New("notification.client_id required when multiple OAuth clients are configured")
 		}
@@ -514,8 +538,11 @@ func (c Config) Validate() error {
 		if local == "" {
 			local = n.UserID
 		}
-		if n.SkillID == "" || n.Token == "" || n.UserID == "" || !ids[local] || n.ClientID != "" && !ci[n.ClientID] {
-			return errors.New("invalid notification identity/credentials")
+		if n.UserID == "" || !ids[local] {
+			return fmt.Errorf("notification[%d].user_id must match users[].id and the ID returned by discovery", i)
+		}
+		if n.ClientID != "" && !ci[n.ClientID] {
+			return fmt.Errorf("notification[%d].client_id must match clients[].clientId", i)
 		}
 	}
 	return nil
@@ -551,4 +578,16 @@ func featureInstances(f Feature) []string {
 		return []string{i}
 	}
 	return nil
+}
+
+func validSkillID(s string) bool {
+	if len(s) == 0 || len(s) > 256 {
+		return false
+	}
+	for _, ch := range s {
+		if !(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-' || ch == '_') {
+			return false
+		}
+	}
+	return true
 }

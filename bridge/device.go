@@ -121,7 +121,7 @@ func (r *Registry) Discovery(user string) []map[string]any {
 			continue
 		}
 		c := d.config
-		m := map[string]any{"id": c.ID, "name": c.Name, "type": c.Type, "capabilities": []map[string]any{}, "properties": []map[string]any{}}
+		m := map[string]any{"id": c.ID, "name": c.Name, "type": c.Type, "status_info": map[string]any{"reportable": false}, "capabilities": []map[string]any{}, "properties": []map[string]any{}}
 		if c.Room != "" {
 			m["room"] = c.Room
 		}

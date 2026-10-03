@@ -1,4 +1,7 @@
 {
+  "logging": {
+    "level": "info"
+  },
   "mqtt": {
     "url": "tcp://127.0.0.1:1883",
     "user": "mqtt-user",

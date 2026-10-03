@@ -184,12 +184,6 @@ func (s *Server) Handler() http.Handler {
 				s.Log.Info("OAuth request", "method", r.Method, "path", r.URL.Path, "status", status)
 			}()
 		}
-		defer func() {
-			if v := recover(); v != nil {
-				s.Log.Error("HTTP panic", "path", r.URL.Path)
-				http.Error(w, "internal error", 500)
-			}
-		}()
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("Content-Security-Policy", s.contentSecurityPolicy())
@@ -202,8 +196,24 @@ func (s *Server) Handler() http.Handler {
 		canonical = strings.TrimSuffix(canonical, "/")
 		if canonical == "/provider" || strings.HasPrefix(canonical, "/provider/") || canonical == "/v1.0" || strings.HasPrefix(canonical, "/v1.0/") {
 			r.URL.Path, r.URL.RawPath = canonical, ""
-			s.Log.Info("provider request", "method", r.Method, "path", r.URL.Path, "request_id", r.Header.Get("X-Request-Id"))
+			audit := &oauthStatusWriter{ResponseWriter: w}
+			w = audit
+			defer func() {
+				status := audit.status
+				if status == 0 {
+					status = http.StatusOK
+				}
+				s.Log.Info("provider response", "method", r.Method, "path", r.URL.Path, "status", status, "request_id", r.Header.Get("X-Request-Id"))
+			}()
+			s.Log.Debug("provider request", "method", r.Method, "path", r.URL.Path, "request_id", r.Header.Get("X-Request-Id"))
 		}
+		// Recover before deferred response auditing so panics are logged as 500.
+		defer func() {
+			if v := recover(); v != nil {
+				s.Log.Error("HTTP panic", "path", r.URL.Path)
+				http.Error(w, "internal error", 500)
+			}
+		}()
 		mux.ServeHTTP(w, r)
 	})
 }
@@ -829,7 +839,9 @@ func (s *Server) devices(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.json(w, 200, map[string]any{"request_id": r.Header.Get("X-Request-Id"), "payload": map[string]any{"user_id": t.UserID, "devices": s.Registry.Discovery(t.UserID)}})
+	devices := s.Registry.Discovery(t.UserID)
+	s.Log.Info("device discovery", "devices", len(devices), "request_id", r.Header.Get("X-Request-Id"))
+	s.json(w, 200, map[string]any{"request_id": r.Header.Get("X-Request-Id"), "payload": map[string]any{"user_id": t.UserID, "devices": devices}})
 }
 
 type requestDevice struct {
