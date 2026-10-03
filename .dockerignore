@@ -1,7 +1,0 @@
-bin
-data
-config.json
-legacy.json
-*.log
-coverage.out
-.git
