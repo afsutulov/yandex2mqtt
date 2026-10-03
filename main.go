@@ -18,7 +18,7 @@ import (
 	"github.com/gofrs/flock"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/term"
-	"yandex2mqtt-go/internal/bridge"
+	"yandex2mqtt/bridge"
 )
 
 var version = "1.2.4"
@@ -38,7 +38,7 @@ func run() error {
 	showVersion := flag.Bool("version", false, "print version")
 	flag.Parse()
 	if *showVersion {
-		fmt.Println("yandex2mqtt-go", version)
+		fmt.Println("yandex2mqtt", version)
 		return nil
 	}
 	if *hash {

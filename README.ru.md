@@ -306,9 +306,7 @@ Go скачивает их при сборке. Первая сборка тре
 
 ```bash
 go mod download
-go test -mod=readonly -race ./...
-go vet -mod=readonly ./...
-CGO_ENABLED=0 go build -buildvcs=false -mod=readonly -trimpath -ldflags="-s -w" -o yandex2mqtt ./cmd/yandex2mqtt
+go build
 ```
 
 Для Windows/arm64/Linux-amd64 задайте `GOOS` и `GOARCH`; готовые варианты есть в bin.

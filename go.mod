@@ -1,4 +1,4 @@
-module yandex2mqtt-go
+module yandex2mqtt
 
 go 1.26.0
 

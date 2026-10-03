@@ -356,9 +356,7 @@ subsequent builds can use the module cache. The race detector needs CGO and a C 
 
 ```bash
 go mod download
-go test -buildvcs=false -mod=readonly -race ./...
-go vet -mod=readonly ./...
-CGO_ENABLED=0 go build -buildvcs=false -mod=readonly -trimpath -ldflags="-s -w" -o yandex2mqtt ./cmd/yandex2mqtt
+go mod build
 ```
 
 Set GOOS and GOARCH to cross-compile. SHA256SUMS contains hashes of the included
