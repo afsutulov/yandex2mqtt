@@ -1,4 +1,4 @@
-# yandex2mqtt (Go)
+# yandex2mqtt
 
 [English (default)](README.md)
 
