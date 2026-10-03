@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.2.6 — notification diagnostics and configurable logging
+
+- Add validated `logging.level` (debug/info/warn/error), default info.
+- Prevent per-message callback storms after 401/403/404 and UNKNOWN_USER: pause only the affected recipient for 300 seconds; probe on the next change after expiry.
+- Log skill/user IDs, request ID, safe error code and actionable hints at WARN; successful callbacks at DEBUG. Never log tokens or arbitrary upstream bodies.
+- Retry an unreadable/truncated 2xx callback response.
+- Add optional per-recipient `enabled: false`; reject draft IDs, URLs and invalid notification identities with clear configuration errors.
+- Include required status_info in discovery and HTTP response status/device count in provider diagnostics.
+- External skill publication, its exact ID and the skill-owner token still have to be configured in Yandex; no remote account changes were made or tested.
+
+
+## 1.2.5
+
+- Consent, denial and trusted-client OAuth return through a non-cached HTML
+  document with meta refresh and a fallback link. The POST redirect chain no
+  longer inherits the consent form's CSP restrictions into the broker's
+  downstream redirects. Callback validation and one-time code/consent checks remain.
+- OAuth paths log HTTP status and fixed rejection reasons without credentials
+  or query data.
+- Added consent return and safe-logging regression tests. Reproduced the old
+  double-click failure in real Chromium 142 against a local HTTPS redirect chain;
+  verified one-click return, token exchange, discovery and code-replay rejection.
+- Runtime configuration and token-store formats are unchanged.
+
+
 ## 1.2.4 — 2026-10-03
 
 - Equalize bcrypt work for mixed-cost accounts and unknown usernames without
