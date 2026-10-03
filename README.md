@@ -2,7 +2,7 @@
 
 [Русская версия](README.ru.md)
 
-A standalone bridge between **Yandex Smart Home / Alice** and MQTT. This is a Go
+A bridge between **Yandex Smart Home / Alice** and MQTT. This is a Go
 rewrite of [alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt), based on
 commit `d26960b8fcc34ba0f4cc6f62114e957b3cc0f0f3`. Upstream attribution is preserved
 in the MIT LICENSE and file hashes are recorded in UPSTREAM.json.
@@ -13,14 +13,6 @@ Node.js is only needed for the optional one-time export of a legacy JS config.
 
 The release includes source, tests, configuration examples and executable binaries
 for Linux amd64/arm64, Windows amd64 and macOS arm64 in `bin/`.
-
-- [Final 1.2.3 review and 1.2.4 fixes](FINAL-REVIEW.ru.md) (Russian).
-- [Production review and 1.2.2 fixes](PRODUCTION.ru.md) (Russian).
-- [Comparison and merge decisions](MERGE.md) / [русский разбор](MERGE.ru.md).
-- [Review of the 12 reported regressions and the MQTT ACL issue](REVIEW.ru.md) (Russian).
-- [Original source audit and fixes](FIXES.md) (Russian).
-- [Verification results and limitations](TESTING.md) (Russian).
-- [Release changes](CHANGELOG.md) (English).
 
 ## Features
 

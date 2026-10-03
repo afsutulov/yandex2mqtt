@@ -2,7 +2,7 @@
 
 [English (default)](README.md)
 
-Самостоятельный мост между **Яндекс Умным домом / Алисой** и MQTT. Перенос проекта
+Мост между **Яндекс Умным домом / Алисой** и MQTT. Перенос проекта
 [alvlapo/yandex2mqtt](https://gitverse.ru/alvlapo/yandex2mqtt), ветка `master`,
 коммит `d26960b8fcc34ba0f4cc6f62114e957b3cc0f0f3`.
 
@@ -25,13 +25,6 @@
 - JSON-конфигурация, отдельные JSON-файлы устройств, миграция старого `config.js`.
 - Готовые программы Linux amd64/arm64, Windows amd64, macOS arm64 в `bin/`.
 - Dockerfile, Compose, systemd и пример конфигурации Nginx.
-
-Итоговая проверка 1.2.3 и исправления 1.2.4: **[FINAL-REVIEW.ru.md](FINAL-REVIEW.ru.md)**.
-Заключение о готовности и исправления 1.2.2: **[PRODUCTION.ru.md](PRODUCTION.ru.md)**.
-Сравнение и объединение двух исправленных версий: **[MERGE.ru.md](MERGE.ru.md)**.
-Подробный анализ оригинала и изменения: **[FIXES.md](FIXES.md)**.
-Разбор замечаний к версии 1.0.0: **[REVIEW.ru.md](REVIEW.ru.md)**.
-Фактические результаты проверки и ограничения: **[TESTING.md](TESTING.md)**.
 
 ## Быстрый запуск готовой программы
 
