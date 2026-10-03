@@ -1,0 +1,18 @@
+{
+  "id": "tv-ir-volume",
+  "name": "TV volume via IR",
+  "type": "devices.types.media_device.tv",
+  "allowedUsers": ["1"],
+  "mqtt": [
+    {"instance": "volume", "set": "home/tv/volume/step", "confirmTimeoutMs": 0}
+  ],
+  "capabilities": [
+    {
+      "type": "devices.capabilities.range",
+      "retrievable": false,
+      "reportable": false,
+      "parameters": {"instance": "volume", "random_access": false}
+    }
+  ],
+  "properties": []
+}
