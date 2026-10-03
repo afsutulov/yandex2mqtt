@@ -1,0 +1,50 @@
+{
+  "id": "color-lamp",
+  "name": "Цветная лампа",
+  "type": "devices.types.light",
+  "room": "Гостиная",
+  "allowedUsers": [
+    "1"
+  ],
+  "mqtt": [
+    {
+      "instance": "rgb",
+      "set": "home/color/rgb/set",
+      "state": "home/color/rgb"
+    },
+    {
+      "instance": "temperature_k",
+      "set": "home/color/temperature/set",
+      "state": "home/color/temperature"
+    },
+    {
+      "instance": "scene",
+      "set": "home/color/scene/set",
+      "state": "home/color/scene"
+    }
+  ],
+  "capabilities": [
+    {
+      "type": "devices.capabilities.color_setting",
+      "retrievable": true,
+      "reportable": true,
+      "parameters": {
+        "color_model": "rgb",
+        "temperature_k": {
+          "min": 2700,
+          "max": 6500
+        },
+        "color_scene": {
+          "scenes": [
+            {
+              "value": "reading"
+            },
+            {
+              "value": "night"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

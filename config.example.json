@@ -1,0 +1,232 @@
+{
+  "mqtt": {
+    "url": "tcp://127.0.0.1:1883",
+    "user": "mqtt-user",
+    "password": "REPLACE_MQTT_PASSWORD",
+    "clientId": "yandex2mqtt-go",
+    "qos": 1,
+    "timeoutMs": 1500
+  },
+  "clients": [
+    {
+      "id": "1",
+      "name": "Yandex",
+      "clientId": "yandex2mqtt",
+      "clientSecret": "REPLACE_WITH_RANDOM_CLIENT_SECRET",
+      "isTrusted": false,
+      "redirectUris": [
+        "https://social.yandex.net/broker/redirect"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "name": "Administrator",
+      "passwordHash": "REPLACE_WITH_BCRYPT_HASH"
+    }
+  ],
+  "devices": [
+    {
+      "id": "haw-002-switch",
+      "name": "Свет в коридоре",
+      "room": "Коридор",
+      "type": "devices.types.light",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "on",
+          "set": "/yandex/controls/light_HaW_002/on",
+          "state": "/yandex/controls/light_HaW_002/on/state",
+          "confirmTimeoutMs": 1200
+        }
+      ],
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "lvr-003-switch",
+      "name": "Основной свет",
+      "room": "Гостиная",
+      "type": "devices.types.light",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "on",
+          "set": "/yandex/controls/light_LvR_003/on",
+          "state": "/yandex/controls/light_LvR_003/on/state",
+          "confirmTimeoutMs": 1200
+        }
+      ],
+      "valueMapping": [
+        {
+          "type": "on_off",
+          "mapping": [
+            [
+              false,
+              true
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "lvr-001-weather",
+      "name": "В гостиной",
+      "room": "Гостиная",
+      "type": "devices.types.sensor",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "temperature",
+          "state": "/yandex/sensors/LvR_001_Weather/temperature"
+        },
+        {
+          "instance": "humidity",
+          "state": "/yandex/sensors/LvR_001_Weather/humidity"
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "parameters": {
+            "instance": "temperature",
+            "unit": "unit.temperature.celsius"
+          },
+          "reportable": true
+        },
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "parameters": {
+            "instance": "humidity",
+            "unit": "unit.percent"
+          },
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "plug-001-flower",
+      "name": "Розетка для цветка",
+      "room": "Гостиная",
+      "type": "devices.types.socket",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "on",
+          "set": "/yandex/controls/socket_LvR_002/on",
+          "state": "/yandex/controls/socket_LvR_002/on/state",
+          "confirmTimeoutMs": 1200
+        },
+        {
+          "instance": "power",
+          "state": "/yandex/controls/socket_LvR_002/power"
+        }
+      ],
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "reportable": true
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "reportable": true
+        }
+      ]
+    },
+    {
+      "id": "haw-001-motion",
+      "name": "Движение",
+      "room": "Коридор",
+      "type": "devices.types.sensor",
+      "allowedUsers": [
+        "1"
+      ],
+      "mqtt": [
+        {
+          "instance": "motion",
+          "state": "/yandex/sensors/HaW_001_Motion/motion"
+        }
+      ],
+      "valueMapping": [
+        {
+          "type": "event",
+          "mapping": [
+            [
+              "not_detected",
+              "detected"
+            ],
+            [
+              "false",
+              "true"
+            ]
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.event",
+          "retrievable": true,
+          "parameters": {
+            "instance": "motion",
+            "events": [
+              {
+                "value": "detected"
+              },
+              {
+                "value": "not_detected"
+              }
+            ]
+          },
+          "reportable": true
+        }
+      ]
+    }
+  ],
+  "http": {
+    "listen": "127.0.0.1:8080",
+    "cookieSecure": true
+  },
+  "oauth": {
+    "accessTokenTTLSeconds": 86400,
+    "refreshTokenTTLSeconds": 7776000,
+    "codeTTLSeconds": 300
+  },
+  "dataFile": "data/tokens.json",
+  "notification": []
+}

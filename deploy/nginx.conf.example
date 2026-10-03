@@ -1,0 +1,16 @@
+server {
+    listen 443 ssl;
+    server_name smart.example.ru;
+    ssl_certificate /etc/letsencrypt/live/smart.example.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/smart.example.ru/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 1m;
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 12s;
+    }
+    # Authorization codes and state are query parameters: keep them out of logs.
+    access_log off;
+}
