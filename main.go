@@ -76,7 +76,12 @@ func run() error {
 		fmt.Printf("Configuration OK: %d devices, %d users\n", len(c.Devices), len(c.Users))
 		return nil
 	}
-	log, e := bridge.NewLogger(os.Stdout, c.Logging)
+	logOutput, e := c.Logging.OpenOutput(os.Stdout)
+	if e != nil {
+		return e
+	}
+	defer logOutput.Close()
+	log, e := bridge.NewLogger(logOutput, c.Logging)
 	if e != nil {
 		return e
 	}

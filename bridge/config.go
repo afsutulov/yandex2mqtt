@@ -149,6 +149,7 @@ func LoadConfig(path string) (Config, error) {
 		return p
 	}
 	c.DataFile = resolve(c.DataFile)
+	c.Logging.File = resolve(c.Logging.File)
 	c.DevicesDir = resolve(c.DevicesDir)
 	c.HTTPS.PrivateKey = resolve(c.HTTPS.PrivateKey)
 	c.HTTPS.Certificate = resolve(c.HTTPS.Certificate)
@@ -281,7 +282,7 @@ func decodeStrictJSON(b []byte, out any) error {
 	return nil
 }
 func (c Config) Validate() error {
-	if _, e := c.Logging.ParseLevel(); e != nil {
+	if e := c.Logging.Validate(); e != nil {
 		return e
 	}
 	for _, raw := range c.HTTP.TrustedProxies {

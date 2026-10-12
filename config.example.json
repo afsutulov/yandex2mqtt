@@ -1,6 +1,8 @@
 {
   "logging": {
-    "level": "info"
+    "level": "info",
+    "file": "",
+    "to_console": true
   },
   "mqtt": {
     "url": "tcp://127.0.0.1:1883",
